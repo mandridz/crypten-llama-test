@@ -2,14 +2,14 @@ import time
 import torch
 import crypten
 import crypten.nn as cnn
-from transformers import LlamaForCausalLM, LlamaTokenizer
+from transformers import AutoTokenizer, AutoModelForCausalLM
 
 crypten.init()
 
 # Загрузка модели и токенизатора
 model_name = "meta-llama/Meta-Llama-3-8B"
-tokenizer = LlamaTokenizer.from_pretrained(model_name)
-model = LlamaForCausalLM.from_pretrained(model_name).to("cuda")
+tokenizer = AutoTokenizer.from_pretrained(model_name)
+model = AutoModelForCausalLM.from_pretrained(model_name).to("cuda")
 
 # Зашифрование модели
 class CrypTenLlamaModel(cnn.Module):
