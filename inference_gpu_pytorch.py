@@ -3,7 +3,7 @@ import torch
 from transformers import LlamaForCausalLM, LlamaTokenizer
 
 # Загрузка модели и токенизатора
-model_name = "meta-llama/Meta-Llama-3.1-8B-Instruct"
+model_name = "meta-llama/Meta-Llama-3-8B"
 tokenizer = LlamaTokenizer.from_pretrained(model_name)
 model = LlamaForCausalLM.from_pretrained(model_name).to("cuda")
 
