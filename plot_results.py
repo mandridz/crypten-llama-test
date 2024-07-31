@@ -1,7 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from flask import Flask, send_file, render_template_string
-import os
 
 app = Flask(__name__)
 
@@ -22,7 +21,7 @@ index = np.arange(n_categories)
 
 # Построение графиков
 fig, ax = plt.subplots()
-bar_width = 0.2
+bar_width = 0.35
 opacity = 0.8
 
 bars = []
@@ -53,6 +52,8 @@ output_image = 'results_plot.png'
 plt.savefig(output_image)
 plt.close(fig)
 
+
+# Flask routes
 @app.route('/')
 def index():
     return render_template_string('''
@@ -70,9 +71,11 @@ def index():
     </html>
     ''')
 
+
 @app.route('/plot.png')
 def plot_png():
     return send_file(output_image, mimetype='image/png')
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)

@@ -1,3 +1,7 @@
 torch~=2.4.0
 transformers~=4.43.3
 crypten
+sentencepiece
+matplotlib~=3.9.1
+numpy~=2.0.1
+Flask~=3.0.3
