@@ -1,11 +1,11 @@
 import time
 import torch
-from transformers import AutoTokenizer, AutoModelForCausalLM
+from transformers import AutoTokenizer, LlamaForCausalLM
 
 # Load the model and tokenizer
 model_name = "meta-llama/Llama-2-7b-hf"  # Use the Llama-2-7b-hf model
 tokenizer = AutoTokenizer.from_pretrained(model_name)
-model = AutoModelForCausalLM.from_pretrained(model_name).to("cuda")  # Move the model to GPU
+model = LlamaForCausalLM.from_pretrained(model_name).to("cuda")  # Move the model to GPU
 
 # Prepare the input data
 input_text = "This is a test input."
