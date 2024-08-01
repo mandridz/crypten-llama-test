@@ -36,8 +36,11 @@ class CrypTenLlamaModel(cnn.Module):
 
 crypten_model = CrypTenLlamaModel(model).encrypt()
 
+# Read the input data from a file
+with open('prompt.txt', 'r') as file:
+    input_text = file.read()
+
 # Prepare the input data
-input_text = "This is a test input."
 input_ids = tokenizer.encode(input_text, return_tensors="pt").to("cuda")  # Move input IDs to GPU
 input_ids_enc = crypten.cryptensor(input_ids)
 
