@@ -9,7 +9,7 @@ crypten.init()
 # Load the model and tokenizer
 model_name = "meta-llama/Llama-2-7b-hf"  # Use the Llama-2-7b-hf model
 tokenizer = AutoTokenizer.from_pretrained(model_name)
-model = LlamaModel.from_pretrained(model_name).to("cuda").half()  # Use FP16 for model
+model = LlamaModel.from_pretrained(model_name).to("cuda")  # Move the model to GPU
 
 # Define a wrapper for the CrypTen model
 class CrypTenLlamaEmbedding(cnn.Module):
@@ -34,12 +34,9 @@ class CrypTenLlamaRest(cnn.Module):
         outputs = self.model(inputs_embeds=inputs_embeds)
         return outputs.last_hidden_state
 
-# Load the decoder separately and keep it unencrypted
-decoder = CrypTenLlamaRest(model).to("cuda").half()  # Ensure decoder is in FP16
-
 # Prepare the input data
 input_text = "This is a test input."
-input_ids = tokenizer.encode(input_text, return_tensors="pt").to("cuda").half()  # Use FP16 for input_ids
+input_ids = tokenizer.encode(input_text, return_tensors="pt").to("cuda")  # Move input IDs to GPU
 input_ids_enc = crypten.cryptensor(input_ids)
 
 # Function to measure inference time with CrypTen (partial encryption)
@@ -52,12 +49,15 @@ def inference_crypten(crypten_embedding, decoder, input_ids_enc):
         # Forward pass through the encrypted embedding part
         inputs_embeds_enc = crypten_embedding(input_ids_enc)
         # Decrypt inputs_embeds for the rest of the model
-        inputs_embeds = inputs_embeds_enc.get_plain_text().half()  # Use FP16 for inputs_embeds
+        inputs_embeds = inputs_embeds_enc.get_plain_text().to("cuda")  # Move inputs_embeds to GPU
         # Forward pass through the decoder
         outputs = decoder(inputs_embeds)
     torch.cuda.synchronize()  # Synchronize GPU after finishing the timer
     end_time = time.time()
     return end_time - start_time
+
+# Load the decoder separately and keep it unencrypted
+decoder = CrypTenLlamaRest(model).to("cuda")  # Move the decoder to GPU
 
 # Measure inference time
 inference_time_crypten = inference_crypten(crypten_embedding, decoder, input_ids_enc)

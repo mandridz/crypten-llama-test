@@ -5,11 +5,11 @@ from transformers import AutoTokenizer, AutoModelForCausalLM
 # Load the model and tokenizer
 model_name = "meta-llama/Llama-2-7b-hf"  # Use the Llama-2-7b-hf model
 tokenizer = AutoTokenizer.from_pretrained(model_name)
-model = AutoModelForCausalLM.from_pretrained(model_name).to("cuda").half()  # Use FP16 for model
+model = AutoModelForCausalLM.from_pretrained(model_name).to("cuda")  # Move the model to GPU
 
 # Prepare the input data
 input_text = "This is a test input."
-input_ids = tokenizer.encode(input_text, return_tensors="pt").to("cuda").half()  # Use FP16 for input_ids
+input_ids = tokenizer.encode(input_text, return_tensors="pt").to("cuda")  # Move input IDs to GPU
 
 # Function to measure inference time with PyTorch
 def inference_pytorch(model, input_ids):
