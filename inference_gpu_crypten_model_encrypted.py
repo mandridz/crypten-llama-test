@@ -11,7 +11,6 @@ model_name = "meta-llama/Llama-2-7b-hf"
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 model = LlamaForCausalLM.from_pretrained(model_name).to("cuda")
 
-
 # Define a wrapper for the CrypTen model
 class CrypTenLlamaModel(cnn.Module):
     def __init__(self, model):
@@ -26,7 +25,6 @@ class CrypTenLlamaModel(cnn.Module):
         outputs_enc = crypten.cryptensor(outputs.logits)
         return outputs_enc
 
-
 crypten_model = CrypTenLlamaModel(model).encrypt()
 
 # Load the input prompt from a file
@@ -35,7 +33,6 @@ with open("prompt.txt", "r", encoding="utf-8") as file:
 
 input_ids = tokenizer.encode(input_text, return_tensors="pt").to("cuda")
 input_ids_enc = crypten.cryptensor(input_ids)
-
 
 # Function to measure inference time and decrypt output
 def inference_crypten(model, input_ids_enc):
@@ -46,11 +43,13 @@ def inference_crypten(model, input_ids_enc):
         end_time = time.time()
     return end_time - start_time, outputs_enc.get_plain_text()
 
-
 inference_time_crypten, outputs_enc_plain = inference_crypten(crypten_model, input_ids_enc)
 
+# Convert the tensor to a list of token IDs
+token_ids = outputs_enc_plain[0].argmax(dim=-1).tolist()
+
 # Decode the generated token ids to text
-generated_text = tokenizer.decode(outputs_enc_plain[0].tolist(), skip_special_tokens=True)
+generated_text = tokenizer.decode(token_ids, skip_special_tokens=True)
 
 print(f"CrypTen GPU Inference time: {inference_time_crypten} seconds")
 print(f"Generated text: {generated_text}")
