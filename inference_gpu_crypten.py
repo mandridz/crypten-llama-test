@@ -26,11 +26,13 @@ class CrypTenLlamaModel(cnn.Module):
 
     def forward(self, input_ids):
         input_ids_plain = input_ids.get_plain_text().long()
-        outputs = self.model.generate(input_ids_plain, max_new_tokens=200)
-        outputs_enc = crypten.cryptensor(outputs)
+        embeddings = self.model.get_input_embeddings()(input_ids_plain)
+        embeddings_enc = crypten.cryptensor(embeddings)
+        outputs = self.model(inputs_embeds=embeddings_enc.get_plain_text())
+        outputs_enc = crypten.cryptensor(outputs.logits)
         return outputs_enc
 
-crypten_model = CrypTenLlamaModel(model)
+crypten_model = CrypTenLlamaModel(model).encrypt()
 
 # Function to measure inference time and decrypt output
 def inference_crypten(model, input_ids_enc):
@@ -45,7 +47,7 @@ def inference_crypten(model, input_ids_enc):
 inference_time_crypten, outputs_enc_plain = inference_crypten(crypten_model, input_ids_enc)
 
 # Decode the token IDs to text
-generated_text = tokenizer.decode(outputs_enc_plain[0], skip_special_tokens=True)
+generated_text = tokenizer.decode(outputs_enc_plain[0].tolist(), skip_special_tokens=True)
 
 print(f"CrypTen GPU Inference time: {inference_time_crypten} seconds")
 print(f"Generated text: {generated_text}")
