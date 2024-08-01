@@ -11,14 +11,18 @@ model = AutoModelForCausalLM.from_pretrained(model_name).to("cuda")
 input_text = "This is a test input."
 input_ids = tokenizer.encode(input_text, return_tensors="pt").to("cuda")
 
+
 # Function to measure inference time with PyTorch
 def inference_pytorch(model, input_ids):
     model.eval()
+    torch.cuda.synchronize()  # Synchronize GPU before starting the timer
+    start_time = time.time()
     with torch.no_grad():
-        start_time = time.time()
         outputs = model(input_ids)
-        end_time = time.time()
+    torch.cuda.synchronize()  # Synchronize GPU after finishing the timer
+    end_time = time.time()
     return end_time - start_time
+
 
 # Measure inference time
 inference_time_pytorch = inference_pytorch(model, input_ids)
