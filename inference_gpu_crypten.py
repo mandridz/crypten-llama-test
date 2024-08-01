@@ -46,8 +46,11 @@ def inference_crypten(model, input_ids_enc):
 # Perform inference
 inference_time_crypten, outputs_enc_plain = inference_crypten(crypten_model, input_ids_enc)
 
+# Get the token IDs from logits
+predicted_token_ids = outputs_enc_plain.argmax(dim=-1).tolist()[0]
+
 # Decode the token IDs to text
-generated_text = tokenizer.decode(outputs_enc_plain[0].tolist(), skip_special_tokens=True)
+generated_text = tokenizer.decode(predicted_token_ids, skip_special_tokens=True)
 
 print(f"CrypTen GPU Inference time: {inference_time_crypten} seconds")
 print(f"Generated text: {generated_text}")
