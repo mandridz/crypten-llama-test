@@ -20,7 +20,7 @@ class CrypTenLlamaModel(cnn.Module):
 
     def forward(self, input_ids):
         # Decrypt input_ids before passing to model
-        input_ids_plain = input_ids.get_plain_text()
+        input_ids_plain = input_ids.get_plain_text().long()  # Ensure the tensor is of type Long
 
         # Forward pass through the embedding layer
         embeddings = self.model.get_input_embeddings()(input_ids_plain)
@@ -43,23 +43,4 @@ input_text = "This is a test input."
 input_ids = tokenizer.encode(input_text, return_tensors="pt").to("cuda")  # Move input IDs to GPU
 input_ids_enc = crypten.cryptensor(input_ids)
 
-
-# Function to measure inference time with CrypTen
-def inference_crypten(crypten_model, input_ids_enc):
-    crypten_model.eval()
-    torch.cuda.synchronize()  # Synchronize GPU before starting the timer
-    start_time = time.time()
-    with torch.no_grad():
-        outputs_enc = crypten_model(input_ids_enc)
-    torch.cuda.synchronize()  # Synchronize GPU after finishing the timer
-    end_time = time.time()
-    return end_time - start_time
-
-
-# Measure inference time
-inference_time_crypten = inference_crypten(crypten_model, input_ids_enc)
-print(f"CrypTen GPU Inference time: {inference_time_crypten} seconds")
-
-# Save the results to a file
-with open('results_gpu_crypten.txt', 'w') as f:
-    f.write(f"{inference_time_crypten}")
+# Function to measure inference
