@@ -7,15 +7,13 @@ model_name = "meta-llama/Llama-2-7b-hf"
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 model = LlamaForCausalLM.from_pretrained(model_name).to("cuda")
 
-
 def inference_pytorch(model, input_ids):
     model.eval()
     with torch.no_grad():
         start_time = time.time()
-        outputs = model.generate(input_ids, max_new_tokens=100, num_beams=5, early_stopping=True)
+        outputs = model.generate(input_ids, max_length=500, num_beams=5, early_stopping=True)
         end_time = time.time()
     return end_time - start_time, outputs
-
 
 while True:
     input_text = input("Enter your prompt: ")
@@ -23,6 +21,7 @@ while True:
         break
 
     input_ids = tokenizer.encode(input_text, return_tensors="pt").to("cuda")
+
     inference_time_pytorch, outputs = inference_pytorch(model, input_ids)
     generated_text = tokenizer.decode(outputs[0], skip_special_tokens=True)
 
