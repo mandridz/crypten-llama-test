@@ -53,12 +53,15 @@ def inference_crypten(crypten_model, input_ids_enc):
         outputs_enc = crypten_model(input_ids_enc)
     torch.cuda.synchronize()  # Synchronize GPU after finishing the timer
     end_time = time.time()
-    return end_time - start_time
+    outputs = outputs_enc.get_plain_text()
+    return end_time - start_time, outputs
 
 # Measure inference time
-inference_time_crypten = inference_crypten(crypten_model, input_ids_enc)
+inference_time_crypten, outputs_enc = inference_crypten(crypten_model, input_ids_enc)
+output_text = tokenizer.decode(torch.argmax(outputs_enc, dim=-1)[0], skip_special_tokens=True)
 print(f"CrypTen GPU Inference time: {inference_time_crypten} seconds")
+print(f"Generated text: {output_text}")
 
 # Save the results to a file
 with open('results_gpu_crypten.txt', 'w') as f:
-    f.write(f"{inference_time_crypten}")
+    f.write(f"{inference_time_crypten}\n{output_text}")
