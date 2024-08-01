@@ -45,7 +45,7 @@ while True:
     inference_time_crypten, logits_enc = inference_crypten(crypten_model, input_ids_enc)
     logits_plain = logits_enc.get_plain_text()
 
-    # Select the token with the highest probability at each step
+    # Using greedy decoding
     predicted_ids = torch.argmax(logits_plain, dim=-1)
 
     generated_text = tokenizer.decode(predicted_ids[0], skip_special_tokens=True)
