@@ -12,19 +12,6 @@ tokenizer = AutoTokenizer.from_pretrained(model_name)
 model = LlamaModel.from_pretrained(model_name).to("cuda")  # Move the model to GPU
 
 # Define a wrapper for the CrypTen model
-class CrypTenLlamaEmbedding(cnn.Module):
-    def __init__(self, model):
-        super(CrypTenLlamaEmbedding, self).__init__()
-        self.embed_tokens = model.embed_tokens
-
-    def forward(self, input_ids):
-        inputs_embeds = self.embed_tokens(input_ids)
-        return inputs_embeds
-
-# Encrypt the embedding part of the model
-crypten_embedding = CrypTenLlamaEmbedding(model).encrypt()
-
-# Define a wrapper for the rest of the model
 class CrypTenLlamaRest(cnn.Module):
     def __init__(self, model):
         super(CrypTenLlamaRest, self).__init__()
@@ -37,30 +24,31 @@ class CrypTenLlamaRest(cnn.Module):
 # Prepare the input data
 input_text = "This is a test input."
 input_ids = tokenizer.encode(input_text, return_tensors="pt").to("cuda")  # Move input IDs to GPU
-input_ids_enc = crypten.cryptensor(input_ids)
+
+# Compute the embeddings before encryption
+with torch.no_grad():
+    inputs_embeds = model.embed_tokens(input_ids)
+
+# Encrypt the embeddings
+inputs_embeds_enc = crypten.cryptensor(inputs_embeds)
+
+# Encrypt the rest of the model
+crypten_rest_model = CrypTenLlamaRest(model).encrypt()
 
 # Function to measure inference time with CrypTen (partial encryption)
-def inference_crypten(crypten_embedding, decoder, input_ids_enc):
-    crypten_embedding.eval()
-    decoder.eval()
+def inference_crypten(crypten_rest_model, inputs_embeds_enc):
+    crypten_rest_model.eval()
     torch.cuda.synchronize()  # Synchronize GPU before starting the timer
     start_time = time.time()
     with torch.no_grad():
-        # Forward pass through the encrypted embedding part
-        inputs_embeds_enc = crypten_embedding(input_ids_enc)
-        # Decrypt inputs_embeds for the rest of the model
-        inputs_embeds = inputs_embeds_enc.get_plain_text().to("cuda")  # Move inputs_embeds to GPU
-        # Forward pass through the decoder
-        outputs = decoder(inputs_embeds)
+        # Forward pass through the encrypted part of the model
+        outputs_enc = crypten_rest_model(inputs_embeds_enc)
     torch.cuda.synchronize()  # Synchronize GPU after finishing the timer
     end_time = time.time()
     return end_time - start_time
 
-# Load the decoder separately and keep it unencrypted
-decoder = CrypTenLlamaRest(model).to("cuda")  # Move the decoder to GPU
-
 # Measure inference time
-inference_time_crypten = inference_crypten(crypten_embedding, decoder, input_ids_enc)
+inference_time_crypten = inference_crypten(crypten_rest_model, inputs_embeds_enc)
 print(f"CrypTen GPU Inference time: {inference_time_crypten} seconds")
 
 # Save the results to a file
