@@ -7,7 +7,7 @@ from transformers import AutoTokenizer, AutoModelForCausalLM, LlamaModel
 crypten.init()
 
 # Load the model and tokenizer
-model_name = "meta-llama/Meta-Llama-3-8B"
+model_name = "meta-llama/Llama-2-7b"  # Use a smaller model
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 model = LlamaModel.from_pretrained(model_name).to("cuda").half()  # Use FP16 for model
 
