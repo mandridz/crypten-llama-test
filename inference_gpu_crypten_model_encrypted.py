@@ -45,11 +45,9 @@ def inference_crypten(model, input_ids_enc):
 
 inference_time_crypten, outputs_enc_plain = inference_crypten(crypten_model, input_ids_enc)
 
-# Convert the tensor to a list of token IDs
-token_ids = outputs_enc_plain[0].argmax(dim=-1).tolist()
-
-# Decode the generated token ids to text
-generated_text = tokenizer.decode(token_ids, skip_special_tokens=True)
+# Generate text using beam search
+beam_output = model.generate(input_ids, max_length=500, num_beams=5, early_stopping=True)
+generated_text = tokenizer.decode(beam_output[0], skip_special_tokens=True)
 
 print(f"CrypTen GPU Inference time: {inference_time_crypten} seconds")
 print(f"Generated text: {generated_text}")
