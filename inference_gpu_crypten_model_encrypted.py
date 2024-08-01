@@ -30,7 +30,7 @@ class CrypTenLlamaModel(cnn.Module):
 crypten_model = CrypTenLlamaModel(model).encrypt()
 
 # Load the input prompt from a file
-with open("input_prompt.txt", "r", encoding="utf-8") as file:
+with open("prompt.txt", "r", encoding="utf-8") as file:
     input_text = file.read()
 
 input_ids = tokenizer.encode(input_text, return_tensors="pt").to("cuda")
