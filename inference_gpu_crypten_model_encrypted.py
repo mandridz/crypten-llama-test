@@ -48,7 +48,9 @@ def inference_crypten(model, input_ids_enc):
 
 
 inference_time_crypten, outputs_enc_plain = inference_crypten(crypten_model, input_ids_enc)
-generated_text = tokenizer.decode(outputs_enc_plain[0], skip_special_tokens=True)
+
+# Decode the generated token ids to text
+generated_text = tokenizer.decode(outputs_enc_plain[0].tolist(), skip_special_tokens=True)
 
 print(f"CrypTen GPU Inference time: {inference_time_crypten} seconds")
 print(f"Generated text: {generated_text}")
