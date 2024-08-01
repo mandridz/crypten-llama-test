@@ -11,6 +11,7 @@ model_name = "meta-llama/Llama-2-7b-hf"  # Use the Llama-2-7b-hf model
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 model = LlamaForCausalLM.from_pretrained(model_name).to("cuda")  # Move the model to GPU
 
+
 # Define a wrapper for the CrypTen model
 class CrypTenLlamaModel(cnn.Module):
     def __init__(self, model):
@@ -34,6 +35,7 @@ class CrypTenLlamaModel(cnn.Module):
         outputs_enc = crypten.cryptensor(outputs.logits)
         return outputs_enc
 
+
 crypten_model = CrypTenLlamaModel(model).encrypt()
 
 # Read the input data from a file
@@ -43,6 +45,7 @@ with open('prompt.txt', 'r') as file:
 # Prepare the input data
 input_ids = tokenizer.encode(input_text, return_tensors="pt").to("cuda")  # Move input IDs to GPU
 input_ids_enc = crypten.cryptensor(input_ids)
+
 
 # Function to measure inference time with CrypTen
 def inference_crypten(crypten_model, input_ids_enc):
@@ -55,6 +58,7 @@ def inference_crypten(crypten_model, input_ids_enc):
     end_time = time.time()
     outputs = outputs_enc.get_plain_text()
     return end_time - start_time, outputs
+
 
 # Measure inference time
 inference_time_crypten, outputs_enc = inference_crypten(crypten_model, input_ids_enc)
