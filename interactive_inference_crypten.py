@@ -24,7 +24,7 @@ class CrypTenLlamaModel(cnn.Module):
         outputs = self.model(inputs_embeds=embeddings_enc.get_plain_text())
         return outputs.logits
 
-crypten_model = CrypTenLlamaModel(model)
+crypten_model = CrypTenLlamaModel(model).encrypt()
 
 def inference_crypten(model, input_ids_enc):
     model.eval()
@@ -43,8 +43,8 @@ while True:
     input_ids_enc = crypten.cryptensor(input_ids)
 
     inference_time_crypten, logits_enc = inference_crypten(crypten_model, input_ids_enc)
-    outputs_enc_plain = logits_enc.get_plain_text()
-    outputs = torch.argmax(outputs_enc_plain, dim=-1)
+    logits_plain = logits_enc.get_plain_text()
+    outputs = torch.argmax(logits_plain, dim=-1)
 
     generated_text = tokenizer.decode(outputs[0].tolist(), skip_special_tokens=True)
 
