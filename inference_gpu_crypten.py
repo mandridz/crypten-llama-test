@@ -7,9 +7,10 @@ from transformers import AutoTokenizer, AutoModelForCausalLM, LlamaModel
 crypten.init()
 
 # Load the model and tokenizer
-model_name = "meta-llama/Llama-2-7b"  # Use a smaller model
+model_name = "meta-llama/Llama-2-7b-hf"  # Use a smaller model
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 model = LlamaModel.from_pretrained(model_name).to("cuda").half()  # Use FP16 for model
+
 
 # Define a wrapper for the CrypTen model
 class CrypTenLlamaModel(cnn.Module):
@@ -21,6 +22,7 @@ class CrypTenLlamaModel(cnn.Module):
         hidden_states = self.model(input_ids=input_ids)[0]
         return hidden_states
 
+
 # Encrypt the model
 crypten_model = CrypTenLlamaModel(model).encrypt()
 
@@ -31,6 +33,7 @@ decoder = AutoModelForCausalLM.from_pretrained(model_name).to("cuda").half()  # 
 input_text = "This is a test input."
 input_ids = tokenizer.encode(input_text, return_tensors="pt").to("cuda").half()  # Use FP16 for input_ids
 input_ids_enc = crypten.cryptensor(input_ids)
+
 
 # Function to measure inference time with CrypTen (partial encryption)
 def inference_crypten(crypten_model, decoder, input_ids_enc):
@@ -48,6 +51,7 @@ def inference_crypten(crypten_model, decoder, input_ids_enc):
     torch.cuda.synchronize()  # Synchronize GPU after finishing the timer
     end_time = time.time()
     return end_time - start_time
+
 
 # Measure inference time
 inference_time_crypten = inference_crypten(crypten_model, decoder, input_ids_enc)
