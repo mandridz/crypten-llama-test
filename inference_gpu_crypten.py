@@ -46,11 +46,11 @@ def inference_crypten(model, input_ids_enc):
 # Perform inference
 inference_time_crypten, outputs_enc_plain = inference_crypten(crypten_model, input_ids_enc)
 
-# Ensure outputs_enc_plain is a list of tokens
-outputs_enc_plain_list = outputs_enc_plain[0].tolist()
+# Get the token ids from the logits
+token_ids = torch.argmax(outputs_enc_plain, dim=-1)
 
 # Convert the list of tokens to text
-generated_text = tokenizer.decode(outputs_enc_plain_list, skip_special_tokens=True)
+generated_text = tokenizer.decode(token_ids[0], skip_special_tokens=True)
 
 print(f"CrypTen GPU Inference time: {inference_time_crypten} seconds")
 print(f"Generated text: {generated_text}")
