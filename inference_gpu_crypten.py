@@ -2,12 +2,12 @@ import time
 import torch
 import crypten
 import crypten.nn as cnn
-from transformers import AutoTokenizer, AutoModelForCausalLM, LlamaModel
+from transformers import AutoTokenizer, LlamaModel
 
 crypten.init()
 
 # Load the model and tokenizer
-model_name = "meta-llama/Llama-2-7b-hf"  # Use a smaller model
+model_name = "meta-llama/Llama-2-7b-hf"  # Use the Llama-2-7b-hf model
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 model = LlamaModel.from_pretrained(model_name).to("cuda").half()  # Use FP16 for model
 
@@ -32,10 +32,10 @@ class CrypTenLlamaRest(cnn.Module):
 
     def forward(self, inputs_embeds):
         outputs = self.model(inputs_embeds=inputs_embeds)
-        return outputs.logits
+        return outputs.last_hidden_state
 
 # Load the decoder separately and keep it unencrypted
-decoder = CrypTenLlamaRest(model).to("cuda").half()  # Use FP16 for decoder
+decoder = CrypTenLlamaRest(model).to("cuda").half()  # Ensure decoder is in FP16
 
 # Prepare the input data
 input_text = "This is a test input."
