@@ -7,17 +7,9 @@ from transformers import AutoTokenizer, LlamaForCausalLM
 crypten.init()
 
 # Load the model and tokenizer
-# model_name = "meta-llama/Llama-2-7b-hf"
-model_name = "meta-llama/Meta-Llama-3-8B"
+model_name = "meta-llama/Llama-2-7b-hf"
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 model = LlamaForCausalLM.from_pretrained(model_name).to("cuda")
-
-# Load the input prompt from a file
-with open("prompt.txt", "r", encoding="utf-8") as file:
-    input_text = file.read()
-
-input_ids = tokenizer.encode(input_text, return_tensors="pt").to("cuda")
-input_ids_enc = crypten.cryptensor(input_ids)
 
 # Define a wrapper for the CrypTen model
 class CrypTenLlamaModel(cnn.Module):
@@ -29,11 +21,19 @@ class CrypTenLlamaModel(cnn.Module):
         input_ids_plain = input_ids.get_plain_text().long()
         embeddings = self.model.get_input_embeddings()(input_ids_plain)
         embeddings_enc = crypten.cryptensor(embeddings)
-        outputs = self.model(inputs_embeds=embeddings_enc.get_plain_text())
+        # Forward pass through the rest of the model
+        outputs = self.model(inputs_embeds=embeddings_enc.get_plain_text(), past_key_values=None)
         outputs_enc = crypten.cryptensor(outputs.logits)
         return outputs_enc
 
 crypten_model = CrypTenLlamaModel(model).encrypt()
+
+# Load the input prompt from a file
+with open("prompt.txt", "r", encoding="utf-8") as file:
+    input_text = file.read()
+
+input_ids = tokenizer.encode(input_text, return_tensors="pt").to("cuda")
+input_ids_enc = crypten.cryptensor(input_ids)
 
 # Function to measure inference time and decrypt output
 def inference_crypten(model, input_ids_enc):
@@ -46,12 +46,7 @@ def inference_crypten(model, input_ids_enc):
 
 # Perform inference
 inference_time_crypten, outputs_enc_plain = inference_crypten(crypten_model, input_ids_enc)
-
-# Get the token IDs from logits
-predicted_token_ids = outputs_enc_plain.argmax(dim=-1).tolist()[0]
-
-# Decode the token IDs to text
-generated_text = tokenizer.decode(predicted_token_ids, skip_special_tokens=True)
+generated_text = tokenizer.decode(outputs_enc_plain[0].tolist(), skip_special_tokens=True)
 
 print(f"CrypTen GPU Inference time: {inference_time_crypten} seconds")
 print(f"Generated text: {generated_text}")
