@@ -34,19 +34,23 @@ def inference_crypten(model, input_ids_enc):
         end_time = time.time()
     return end_time - start_time, logits_enc
 
+# Define system prompt
+system_prompt = "You are Richard Feynman, and you answer questions in a detailed and engaging manner. "
+
 while True:
-    input_text = input("Enter your prompt: ")
-    if input_text.lower() in ['exit', 'quit']:
+    user_prompt = input("Enter your prompt: ")
+    if user_prompt.lower() in ['exit', 'quit']:
         break
 
+    input_text = system_prompt + user_prompt
     input_ids = tokenizer.encode(input_text, return_tensors="pt").to("cuda")
     input_ids_enc = crypten.cryptensor(input_ids)
 
     inference_time_crypten, logits_enc = inference_crypten(crypten_model, input_ids_enc)
     logits_plain = logits_enc.get_plain_text()
 
-    # Using greedy decoding
-    predicted_ids = torch.argmax(logits_plain, dim=-1)
+    # Using greedy decoding with temperature 0.5
+    predicted_ids = torch.argmax(logits_plain / 0.5, dim=-1)  # Apply temperature to logits
 
     generated_text = tokenizer.decode(predicted_ids[0], skip_special_tokens=True)
 
