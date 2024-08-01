@@ -3,7 +3,8 @@ import torch
 from transformers import AutoTokenizer, LlamaForCausalLM
 
 # Load the model and tokenizer
-model_name = "meta-llama/Llama-2-7b-hf"  # Use the Llama-2-7b-hf model
+# model_name = "meta-llama/Llama-2-7b-hf"  # Use the Llama-2-7b-hf model
+model_name = "meta-llama/Meta-Llama-3-8B"
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 model = LlamaForCausalLM.from_pretrained(model_name).to("cuda")  # Move the model to GPU
 
