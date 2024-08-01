@@ -22,18 +22,17 @@ class CrypTenLlamaModel(cnn.Module):
         embeddings = self.model.get_input_embeddings()(input_ids_plain)
         embeddings_enc = crypten.cryptensor(embeddings)
         outputs = self.model(inputs_embeds=embeddings_enc.get_plain_text())
-        outputs_enc = crypten.cryptensor(outputs.logits)
-        return outputs_enc
+        return outputs.logits
 
-crypten_model = CrypTenLlamaModel(model).encrypt()
+crypten_model = CrypTenLlamaModel(model)
 
 def inference_crypten(model, input_ids_enc):
     model.eval()
     with torch.no_grad():
         start_time = time.time()
-        outputs_enc = model(input_ids_enc)
+        logits_enc = model(input_ids_enc)
         end_time = time.time()
-    return end_time - start_time, outputs_enc.get_plain_text()
+    return end_time - start_time, logits_enc
 
 while True:
     input_text = input("Enter your prompt: ")
@@ -43,10 +42,11 @@ while True:
     input_ids = tokenizer.encode(input_text, return_tensors="pt").to("cuda")
     input_ids_enc = crypten.cryptensor(input_ids)
 
-    inference_time_crypten, outputs_enc_plain = inference_crypten(crypten_model, input_ids_enc)
-    outputs_enc_plain_list = outputs_enc_plain.tolist()
+    inference_time_crypten, logits_enc = inference_crypten(crypten_model, input_ids_enc)
+    outputs_enc_plain = logits_enc.get_plain_text()
+    outputs = torch.argmax(outputs_enc_plain, dim=-1)
 
-    generated_text = tokenizer.decode(outputs_enc_plain_list[0], skip_special_tokens=True)
+    generated_text = tokenizer.decode(outputs[0].tolist(), skip_special_tokens=True)
 
     print(f"CrypTen GPU Inference time: {inference_time_crypten} seconds")
     print(f"Generated text: {generated_text}")
