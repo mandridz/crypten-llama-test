@@ -43,10 +43,11 @@ def inference_crypten(model, input_ids_enc):
         end_time = time.time()
     return end_time - start_time, outputs_enc.get_plain_text()
 
+# Perform inference
 inference_time_crypten, outputs_enc_plain = inference_crypten(crypten_model, input_ids_enc)
 
-# Generate text using beam search
-beam_output = model.generate(input_ids, max_length=500, num_beams=5, early_stopping=True)
+# Generate text with the model
+beam_output = model.generate(input_ids, max_new_tokens=500, num_beams=5, early_stopping=True)
 generated_text = tokenizer.decode(beam_output[0], skip_special_tokens=True)
 
 print(f"CrypTen GPU Inference time: {inference_time_crypten} seconds")
