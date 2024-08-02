@@ -11,54 +11,29 @@ model_name = "meta-llama/Llama-2-7b-hf"
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 model = LlamaForCausalLM.from_pretrained(model_name).to("cuda")
 
-# Define a wrapper for the CrypTen model
-class CrypTenLlamaModel(cnn.Module):
-    def __init__(self, model):
-        super(CrypTenLlamaModel, self).__init__()
-        self.model = model
-
-    def forward(self, input_ids):
-        input_ids_plain = input_ids.get_plain_text().long()
-        embeddings = self.model.get_input_embeddings()(input_ids_plain)
-        outputs = self.model(inputs_embeds=embeddings)
-        logits_enc = crypten.cryptensor(outputs.logits)
-        return logits_enc
-
-crypten_model = CrypTenLlamaModel(model).encrypt()
-
+# Function to measure inference time
 def inference_crypten(model, input_ids_enc):
     model.eval()
     with torch.no_grad():
         start_time = time.time()
-        logits_enc = model(input_ids_enc)
+        input_ids_plain = input_ids_enc.get_plain_text().long()  # Decrypt input_ids
+        output = model.generate(input_ids_plain, max_length=500, num_beams=5, early_stopping=True, temperature=0.5)
         end_time = time.time()
-    return end_time - start_time, logits_enc
+    return end_time - start_time, output
 
-# Define system prompt
-system_prompt = "You are Richard Feynman, and you answer questions in a detailed and engaging manner. "
-
+# Interactive loop for inference
 while True:
-    user_prompt = input("Enter your prompt: ")
-    if user_prompt.lower() in ['exit', 'quit']:
+    prompt = input("Enter your prompt (or type 'exit' to quit): ")
+    if prompt.lower() == 'exit':
         break
 
-    input_text = system_prompt + user_prompt
-    input_ids = tokenizer.encode(input_text, return_tensors="pt").to("cuda")
+    # Prepare the input data
+    input_ids = tokenizer.encode(prompt, return_tensors="pt").to("cuda")
     input_ids_enc = crypten.cryptensor(input_ids)
 
-    inference_time_crypten, logits_enc = inference_crypten(crypten_model, input_ids_enc)
-    logits_plain = logits_enc.get_plain_text()
-
-    # Greedy decoding using the model logits
-    predicted_ids = torch.argmax(logits_plain, dim=-1)
-
-    generated_text = tokenizer.decode(predicted_ids[0], skip_special_tokens=True)
+    # Perform inference with CrypTen
+    inference_time_crypten, outputs = inference_crypten(model, input_ids_enc)
+    generated_text = tokenizer.decode(outputs[0], skip_special_tokens=True)
 
     print(f"CrypTen GPU Inference time: {inference_time_crypten} seconds")
     print(f"Generated text: {generated_text}")
-
-    with open('results_crypten.txt', 'a') as f:
-        f.write(f"{inference_time_crypten}\n")
-
-    with open('outputs_crypten.txt', 'a') as f:
-        f.write(f"{generated_text}\n")
