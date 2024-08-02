@@ -1,12 +1,12 @@
 import torch
 import time
-from transformers import AutoTokenizer, LlamaForCausalLM
+from transformers import AutoTokenizer, AutoModelForCausalLM
 from sklearn.metrics import precision_score, recall_score, f1_score, accuracy_score
 
 # Load model and tokenizer
-model_name = "meta-llama/Meta-Llama-3-8B"
+model_name = "IlyaGusev/saiga_llama3_8b_gguf"
 tokenizer = AutoTokenizer.from_pretrained(model_name)
-model = LlamaForCausalLM.from_pretrained(model_name).to("cuda")
+model = AutoModelForCausalLM.from_pretrained(model_name).to("cuda")
 
 # Function to perform inference
 def inference_pytorch(model, input_ids):
