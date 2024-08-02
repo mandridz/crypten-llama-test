@@ -5,3 +5,5 @@ sentencepiece
 matplotlib~=3.9.1
 numpy~=2.0.1
 Flask~=3.0.3
+nltk~=3.8.1
+rouge~=1.0.1
