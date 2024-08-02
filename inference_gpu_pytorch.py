@@ -36,6 +36,11 @@ inference_time_pytorch, generated_text, outputs = inference_pytorch(model, input
 ground_truth = [1 if token_id != tokenizer.pad_token_id else 0 for token_id in input_ids[0].tolist()]
 predicted = [1 if token_id != tokenizer.pad_token_id else 0 for token_id in outputs[0].tolist()]
 
+# Ensure lengths are the same for metric calculation
+min_length = min(len(ground_truth), len(predicted))
+ground_truth = ground_truth[:min_length]
+predicted = predicted[:min_length]
+
 precision = precision_score(ground_truth, predicted, zero_division=1)
 recall = recall_score(ground_truth, predicted, zero_division=1)
 f1 = f1_score(ground_truth, predicted, zero_division=1)

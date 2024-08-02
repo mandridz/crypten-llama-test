@@ -79,4 +79,56 @@ def create_bar_plots():
     fig, ax = plt.subplots()
     ax.bar(labels, f1_scores, color=['blue', 'green'])
     ax.set_xlabel('Model')
-    ax.set_ylabel
+    ax.set_ylabel('F1 Score')
+    ax.set_title('F1 Score Comparison')
+    plt.savefig('static/f1_score_comparison.png')
+
+    # Accuracy
+    accuracy_scores = [results[label]["accuracy"] for label in labels]
+    fig, ax = plt.subplots()
+    ax.bar(labels, accuracy_scores, color=['blue', 'green'])
+    ax.set_xlabel('Model')
+    ax.set_ylabel('Accuracy')
+    ax.set_title('Accuracy Comparison')
+    plt.savefig('static/accuracy_comparison.png')
+
+
+create_bar_plots()
+
+# HTML template to display results
+html_template = """
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Model Inference Results</title>
+</head>
+<body>
+    <h1>Model Inference Results</h1>
+    <h2>Inference Time Comparison</h2>
+    <img src="/static/inference_time_comparison.png" alt="Inference Time Comparison">
+
+    <h2>Precision Comparison</h2>
+    <img src="/static/precision_comparison.png" alt="Precision Comparison">
+
+    <h2>Recall Comparison</h2>
+    <img src="/static/recall_comparison.png" alt="Recall Comparison">
+
+    <h2>F1 Score Comparison</h2>
+    <img src="/static/f1_score_comparison.png" alt="F1 Score Comparison">
+
+    <h2>Accuracy Comparison</h2>
+    <img src="/static/accuracy_comparison.png" alt="Accuracy Comparison">
+</body>
+</html>
+"""
+
+
+@app.route('/')
+def display_results():
+    return render_template_string(html_template)
+
+
+if __name__ == '__main__':
+    app.run(debug=True, host='0.0.0.0')

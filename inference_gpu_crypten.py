@@ -23,7 +23,7 @@ def inference_crypten(model, input_ids_enc):
     model.eval()
     with torch.no_grad():
         start_time = time.time()
-        logits = model(input_ids_enc.get_plain_text().to("cuda")).logits
+        logits = model(input_ids_enc.get_plain_text().long().to("cuda")).logits
         end_time = time.time()
 
     inference_time = end_time - start_time
@@ -38,6 +38,11 @@ generated_text = tokenizer.decode(outputs_enc_plain[0], skip_special_tokens=True
 # For simplicity, assuming ground_truth and predicted outputs are binary labels for metrics
 ground_truth = [1 if token_id != tokenizer.pad_token_id else 0 for token_id in input_ids[0].tolist()]
 predicted = [1 if token_id != tokenizer.pad_token_id else 0 for token_id in outputs_enc_plain[0]]
+
+# Ensure lengths are the same for metric calculation
+min_length = min(len(ground_truth), len(predicted))
+ground_truth = ground_truth[:min_length]
+predicted = predicted[:min_length]
 
 precision = precision_score(ground_truth, predicted, zero_division=1)
 recall = recall_score(ground_truth, predicted, zero_division=1)
