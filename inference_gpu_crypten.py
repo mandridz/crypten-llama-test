@@ -15,7 +15,10 @@ def inference_crypten(model, input_ids_enc):
     model.eval()
     with torch.no_grad():
         start_time = time.time()
-        logits = model(input_ids_enc.get_plain_text().to("cuda")).logits
+        # Decrypt input IDs, convert to Long type and move to CUDA
+        input_ids_plain = input_ids_enc.get_plain_text().long().to("cuda")
+        # Perform inference
+        logits = model(input_ids_plain).logits
         end_time = time.time()
     return end_time - start_time, logits
 
