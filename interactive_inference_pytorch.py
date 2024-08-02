@@ -14,7 +14,7 @@ def inference_pytorch(model, input_ids):
     model.eval()
     with torch.no_grad():
         start_time = time.time()
-        outputs = model.generate(input_ids, max_length=500, temperature=0.5)  # Using temperature 0.5
+        outputs = model.generate(input_ids, max_length=500, num_beams=5, temperature=0.5, early_stopping=True)  # Using temperature 0.5
         end_time = time.time()
     return end_time - start_time, outputs
 
