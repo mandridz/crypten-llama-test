@@ -10,12 +10,12 @@ def run_script(script_name):
 
 
 # Run interactive_inference_pytorch.py
-print("Running inference_inference_pytorch.py")
-run_script('inference_inference_pytorch.py')
+print("Running inference_gpu_pytorch.py")
+run_script('inference_gpu_pytorch.py')
 
 # Run interactive_inference_crypten.py
-print("Running inference_inference_crypten.py")
-run_script('inference_inference_crypten.py')
+print("Running inference_gpu_crypten.py")
+run_script('inference_gpu_crypten.py')
 
 # Run plot_results.py
 print("Running plot_results.py")
