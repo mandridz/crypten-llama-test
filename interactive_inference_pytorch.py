@@ -31,3 +31,9 @@ while True:
 
     print(f"PyTorch GPU Inference time: {inference_time_pytorch} seconds")
     print(f"Generated text: {generated_text}")
+
+    with open('results_pytorch.txt', 'a') as f:
+        f.write(f"{inference_time_pytorch}\n")
+
+    with open('outputs_pytorch.txt', 'a') as f:
+        f.write(f"{generated_text}\n")

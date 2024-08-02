@@ -56,3 +56,9 @@ while True:
 
     print(f"CrypTen GPU Inference time: {inference_time_crypten} seconds")
     print(f"Generated text: {generated_text}")
+
+    with open('results_crypten.txt', 'a') as f:
+        f.write(f"{inference_time_crypten}\n")
+
+    with open('outputs_crypten.txt', 'a') as f:
+        f.write(f"{generated_text}\n")
