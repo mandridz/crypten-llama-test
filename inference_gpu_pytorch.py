@@ -1,9 +1,6 @@
 import time
 import torch
 from transformers import AutoTokenizer, LlamaForCausalLM
-from flask import Flask, jsonify
-
-app = Flask(__name__)
 
 # Load the model and tokenizer
 model_name = "meta-llama/Meta-Llama-3-8B"
@@ -20,25 +17,20 @@ def inference_pytorch(model, input_ids):
     return end_time - start_time, outputs
 
 
-@app.route('/inference', methods=['POST'])
-def run_inference():
-    with open("prompt.txt", "r", encoding="utf-8") as file:
-        input_text = file.read()
+# Load prompt from file
+with open("prompt.txt", "r", encoding="utf-8") as file:
+    input_text = file.read()
 
-    if not input_text:
-        return jsonify({'error': 'No input text provided'}), 400
+if not input_text:
+    raise ValueError('No input text provided')
 
-    input_ids = tokenizer.encode(input_text, return_tensors="pt").to("cuda")
-    inference_time_pytorch, outputs = inference_pytorch(model, input_ids)
-    generated_text = tokenizer.decode(outputs[0], skip_special_tokens=True)
+input_ids = tokenizer.encode(input_text, return_tensors="pt").to("cuda")
+inference_time_pytorch, outputs = inference_pytorch(model, input_ids)
+generated_text = tokenizer.decode(outputs[0], skip_special_tokens=True)
 
-    result = {
-        'inference_time': inference_time_pytorch,
-        'generated_text': generated_text
-    }
+# Save results to file
+with open('results_gpu_pytorch.txt', 'w', encoding="utf-8") as f:
+    f.write(f"Inference time: {inference_time_pytorch}\n")
+    f.write(f"Generated text: {generated_text}\n")
 
-    return jsonify(result)
-
-
-if __name__ == '__main__':
-    app.run(debug=True)
+print("Results saved to results_gpu_pytorch.txt")

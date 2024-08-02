@@ -8,12 +8,15 @@ app = Flask(__name__)
 
 def plot_results():
     # Load results
-    results = pd.read_csv("results.csv")
+    results_pytorch = pd.read_csv("results_gpu_pytorch.txt", sep=": ", header=None, engine='python').set_index(0).T
+    results_crypten = pd.read_csv("results_gpu_crypten.txt", sep=": ", header=None, engine='python').set_index(0).T
 
     fig, ax = plt.subplots()
 
     # Plot inference times
-    ax.bar(results['Model'], results['Inference Time'], label='Inference Time')
+    models = ['PyTorch', 'CrypTen']
+    times = [float(results_pytorch['Inference time']), float(results_crypten['Inference time'])]
+    ax.bar(models, times, label='Inference Time')
     ax.set_xlabel('Model')
     ax.set_ylabel('Time (seconds)')
     ax.set_title('Inference Time Comparison')
