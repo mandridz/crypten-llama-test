@@ -1,59 +1,47 @@
-import os
 import matplotlib.pyplot as plt
-from flask import Flask, send_file, render_template_string
 import pandas as pd
+from flask import Flask, render_template_string
 
+# Read results
+results = {}
+files = ['results_gpu_pytorch.txt', 'results_gpu_crypten.txt']
+labels = ['PyTorch', 'CrypTen']
+
+for label, file in zip(labels, files):
+    with open(file, 'r') as f:
+        data = f.readlines()
+        inference_time = float(data[0].strip())
+        perplexity = float(data[1].strip())
+        bleu_score = float(data[2].strip())
+        rouge_scores = eval(data[3].strip())
+        generated_text = data[4].strip()
+
+        results[label] = {
+            'Inference Time': inference_time,
+            'Perplexity': perplexity,
+            'BLEU Score': bleu_score,
+            'ROUGE Scores': rouge_scores,
+            'Generated Text': generated_text
+        }
+
+# Flask app to display results
 app = Flask(__name__)
 
-
 @app.route('/')
-def home():
-    return render_template_string("""
-        <h1>Inference Time Comparison</h1>
-        <img src="/plot.png" alt="Inference Time Comparison">
-    """)
-
-
-@app.route('/plot.png')
-def plot_png():
-    # Read results from files
-    pytorch_times = []
-    with open('results_pytorch.txt', 'r') as f:
-        pytorch_times = [float(line.strip()) for line in f.readlines()]
-
-    crypten_times = []
-    with open('results_crypten.txt', 'r') as f:
-        crypten_times = [float(line.strip()) for line in f.readlines()]
-
-    # Ensure we have the same number of entries
-    min_len = min(len(pytorch_times), len(crypten_times))
-    pytorch_times = pytorch_times[:min_len]
-    crypten_times = crypten_times[:min_len]
-
-    # Plotting the results
-    plt.figure(figsize=(10, 5))
-    labels = [f'Run {i + 1}' for i in range(min_len)]
-    x = range(min_len)
-
-    plt.bar(x, pytorch_times, width=0.4, label='PyTorch', align='center')
-    plt.bar(x, crypten_times, width=0.4, label='CrypTen', align='edge')
-    plt.xlabel('Run')
-    plt.ylabel('Inference Time (s)')
-    plt.title('Inference Time Comparison: PyTorch vs CrypTen')
-    plt.legend()
-
-    # Adding values on top of the bars
-    for i in x:
-        plt.text(i, pytorch_times[i] + 0.01, f'{pytorch_times[i]:.2f}', ha='center')
-        plt.text(i + 0.4, crypten_times[i] + 0.01, f'{crypten_times[i]:.2f}', ha='center')
-
-    # Save plot to a PNG file
-    plot_path = '/tmp/plot.png'
-    plt.savefig(plot_path)
-    plt.close()
-
-    return send_file(plot_path, mimetype='image/png')
-
+def index():
+    html = """
+    <h1>Model Inference Results</h1>
+    {% for label, metrics in results.items() %}
+        <h2>{{ label }}</h2>
+        <p><strong>Inference Time:</strong> {{ metrics['Inference Time'] }} seconds</p>
+        <p><strong>Perplexity:</strong> {{ metrics['Perplexity'] }}</p>
+        <p><strong>BLEU Score:</strong> {{ metrics['BLEU Score'] }}</p>
+        <p><strong>ROUGE Scores:</strong> {{ metrics['ROUGE Scores'] }}</p>
+        <p><strong>Generated Text:</strong> {{ metrics['Generated Text'] }}</p>
+        <hr>
+    {% endfor %}
+    """
+    return render_template_string(html, results=results)
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    app.run(debug=True)

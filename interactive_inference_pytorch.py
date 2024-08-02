@@ -1,39 +1,50 @@
 import time
 import torch
 from transformers import AutoTokenizer, LlamaForCausalLM
+import torch.nn.functional as F
+from nltk.translate.bleu_score import sentence_bleu
+from rouge import Rouge
 
 # Load the model and tokenizer
 model_name = "meta-llama/Llama-2-7b-hf"
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 model = LlamaForCausalLM.from_pretrained(model_name).to("cuda")
 
-# Define system prompt
-system_prompt = "You are Richard Feynman, and you answer questions in a detailed and engaging manner. "
-
+# Function to measure inference time and generate output
 def inference_pytorch(model, input_ids):
     model.eval()
     with torch.no_grad():
         start_time = time.time()
-        outputs = model.generate(input_ids, max_length=500, num_beams=5, temperature=0.5, early_stopping=True)  # Using temperature 0.5
+        outputs = model.generate(input_ids, max_length=500, num_beams=5, early_stopping=True, temperature=0.5)
         end_time = time.time()
     return end_time - start_time, outputs
 
-while True:
-    user_prompt = input("Enter your prompt: ")
-    if user_prompt.lower() in ['exit', 'quit']:
-        break
+# Function to calculate metrics
+def calculate_metrics(logits, labels, reference, hypothesis):
+    loss = F.cross_entropy(logits.view(-1, logits.size(-1)), labels.view(-1), reduction='none')
+    perplexity = torch.exp(loss.mean()).item()
 
-    input_text = system_prompt + user_prompt
-    input_ids = tokenizer.encode(input_text, return_tensors="pt").to("cuda")
+    reference = [reference.split()]
+    hypothesis = hypothesis.split()
+    bleu_score = sentence_bleu(reference, hypothesis)
 
-    inference_time_pytorch, outputs = inference_pytorch(model, input_ids)
-    generated_text = tokenizer.decode(outputs[0], skip_special_tokens=True)
+    rouge = Rouge()
+    rouge_scores = rouge.get_scores(hypothesis, reference[0])
 
-    print(f"PyTorch GPU Inference time: {inference_time_pytorch} seconds")
-    print(f"Generated text: {generated_text}")
+    return perplexity, bleu_score, rouge_scores
 
-    with open('results_pytorch.txt', 'a') as f:
-        f.write(f"{inference_time_pytorch}\n")
+prompt = "Please write a short story about an adventurous journey."
+input_ids = tokenizer.encode(prompt, return_tensors="pt").to("cuda")
 
-    with open('outputs_pytorch.txt', 'a') as f:
-        f.write(f"{generated_text}\n")
+inference_time_pytorch, outputs = inference_pytorch(model, input_ids)
+generated_text = tokenizer.decode(outputs[0], skip_special_tokens=True)
+
+reference_text = prompt  # For simplicity, using the prompt as reference
+perplexity, bleu_score, rouge_scores = calculate_metrics(outputs, input_ids, reference_text, generated_text)
+
+with open('results_gpu_pytorch.txt', 'w') as f:
+    f.write(f"{inference_time_pytorch}\n")
+    f.write(f"{perplexity}\n")
+    f.write(f"{bleu_score}\n")
+    f.write(f"{rouge_scores}\n")
+    f.write(f"{generated_text}\n")
