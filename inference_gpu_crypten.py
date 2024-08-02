@@ -7,7 +7,7 @@ from sklearn.metrics import precision_score, recall_score, f1_score, accuracy_sc
 crypten.init()
 
 # Load model and tokenizer
-model_name = "IlyaGusev/saiga_llama3_8b_gguf"
+model_name = "mistralai/Mistral-Nemo-Instruct-2407"
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 model = AutoModelForCausalLM.from_pretrained(model_name).to("cuda")
 
