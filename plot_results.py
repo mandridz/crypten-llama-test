@@ -1,8 +1,13 @@
+import os
 import pandas as pd
 import matplotlib.pyplot as plt
 from flask import Flask, render_template_string
 
 app = Flask(__name__)
+
+# Create the static directory if it doesn't exist
+if not os.path.exists('static'):
+    os.makedirs('static')
 
 # Load results from files
 results = {}
