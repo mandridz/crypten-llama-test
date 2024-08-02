@@ -15,55 +15,68 @@ with open('results_gpu_pytorch.txt', 'r', encoding="utf-8") as f:
     lines = f.readlines()
     results["PyTorch"] = {
         "inference_time": float(lines[0].strip().split(": ")[1]),
-        "generated_text": lines[1].strip().split(": ")[1]
+        "generated_text": lines[1].strip().split(": ", 1)[1],
+        "precision": float(lines[2].strip().split(": ")[1]),
+        "recall": float(lines[3].strip().split(": ")[1]),
+        "f1_score": float(lines[4].strip().split(": ")[1]),
+        "accuracy": float(lines[5].strip().split(": ")[1]),
     }
 
 with open('results_gpu_crypten.txt', 'r', encoding="utf-8") as f:
     lines = f.readlines()
     results["CrypTen"] = {
         "inference_time": float(lines[0].strip().split(": ")[1]),
-        "generated_text": lines[1].strip().split(": ")[1]
+        "generated_text": lines[1].strip().split(": ", 1)[1],
+        "precision": float(lines[2].strip().split(": ")[1]),
+        "recall": float(lines[3].strip().split(": ")[1]),
+        "f1_score": float(lines[4].strip().split(": ")[1]),
+        "accuracy": float(lines[5].strip().split(": ")[1]),
     }
 
+# Print results to console
+for model, data in results.items():
+    print(f"{model} Inference Time: {data['inference_time']} seconds")
+    print(f"{model} Generated Text: {data['generated_text']}")
+    print(f"{model} Precision: {data['precision']}")
+    print(f"{model} Recall: {data['recall']}")
+    print(f"{model} F1 Score: {data['f1_score']}")
+    print(f"{model} Accuracy: {data['accuracy']}")
 
-# Create a bar plot
-def create_bar_plot():
+
+# Create bar plots
+def create_bar_plots():
     labels = list(results.keys())
-    inference_times = [results[label]["inference_time"] for label in labels]
 
+    # Inference Time
+    inference_times = [results[label]["inference_time"] for label in labels]
     fig, ax = plt.subplots()
     ax.bar(labels, inference_times, color=['blue', 'green'])
     ax.set_xlabel('Model')
     ax.set_ylabel('Inference Time (s)')
     ax.set_title('Inference Time Comparison')
-
-    # Save plot to a file
     plt.savefig('static/inference_time_comparison.png')
 
+    # Precision
+    precision_scores = [results[label]["precision"] for label in labels]
+    fig, ax = plt.subplots()
+    ax.bar(labels, precision_scores, color=['blue', 'green'])
+    ax.set_xlabel('Model')
+    ax.set_ylabel('Precision')
+    ax.set_title('Precision Comparison')
+    plt.savefig('static/precision_comparison.png')
 
-# Route for displaying the results
-@app.route('/')
-def display_results():
-    create_bar_plot()
-    results_html = ""
-    for model, data in results.items():
-        results_html += f"<h2>{model}</h2>"
-        results_html += f"<p><b>Inference Time:</b> {data['inference_time']} seconds</p>"
-        results_html += f"<p><b>Generated Text:</b> {data['generated_text']}</p>"
+    # Recall
+    recall_scores = [results[label]["recall"] for label in labels]
+    fig, ax = plt.subplots()
+    ax.bar(labels, recall_scores, color=['blue', 'green'])
+    ax.set_xlabel('Model')
+    ax.set_ylabel('Recall')
+    ax.set_title('Recall Comparison')
+    plt.savefig('static/recall_comparison.png')
 
-    html = f"""
-    <html>
-    <head><title>Inference Results</title></head>
-    <body>
-        <h1>Inference Results</h1>
-        {results_html}
-        <h2>Inference Time Comparison</h2>
-        <img src="/static/inference_time_comparison.png" alt="Inference Time Comparison">
-    </body>
-    </html>
-    """
-    return render_template_string(html)
-
-
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    # F1 Score
+    f1_scores = [results[label]["f1_score"] for label in labels]
+    fig, ax = plt.subplots()
+    ax.bar(labels, f1_scores, color=['blue', 'green'])
+    ax.set_xlabel('Model')
+    ax.set_ylabel

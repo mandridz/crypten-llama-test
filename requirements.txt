@@ -7,4 +7,5 @@ numpy~=2.0.1
 Flask~=3.0.3
 nltk~=3.8.1
 rouge~=1.0.1
-pandas
+pandas~=2.2.2
+scikit-learn~=1.5.1
