@@ -1,17 +1,12 @@
 from flask import Flask, render_template_string
 import matplotlib.pyplot as plt
-import pandas as pd
 import os
 
 app = Flask(__name__)
 
 @app.route('/')
 def display_results():
-    results_pytorch = pd.read_csv('results_gpu_pytorch.txt', sep='\n', header=None, names=["Result"])
-    results_crypten = pd.read_csv('results_gpu_crypten.txt', sep='\n', header=None, names=["Result"])
-
-    # Parsing the results
-    def parse_results(results):
+    def parse_results(file_path):
         metrics = {
             "Inference time": [],
             "Precision": [],
@@ -21,18 +16,27 @@ def display_results():
             "Generated text": [],
             "Prompt": []
         }
-        for i in range(0, len(results), 8):
-            metrics["Inference time"].append(float(results[i].split(": ")[1]))
-            metrics["Precision"].append(float(results[i + 1].split(": ")[1]))
-            metrics["Recall"].append(float(results[i + 2].split(": ")[1]))
-            metrics["F1 Score"].append(float(results[i + 3].split(": ")[1]))
-            metrics["Accuracy"].append(float(results[i + 4].split(": ")[1]))
-            metrics["Generated text"].append(results[i + 5].split(": ")[1])
-            metrics["Prompt"].append(results[i + 6].split(": ")[1])
+        with open(file_path, 'r') as file:
+            lines = file.readlines()
+            for line in lines:
+                if "Inference time:" in line:
+                    metrics["Inference time"].append(float(line.split(": ")[1].strip()))
+                elif "Precision:" in line:
+                    metrics["Precision"].append(float(line.split(": ")[1].strip()))
+                elif "Recall:" in line:
+                    metrics["Recall"].append(float(line.split(": ")[1].strip()))
+                elif "F1 Score:" in line:
+                    metrics["F1 Score"].append(float(line.split(": ")[1].strip()))
+                elif "Accuracy:" in line:
+                    metrics["Accuracy"].append(float(line.split(": ")[1].strip()))
+                elif "Generated text:" in line:
+                    metrics["Generated text"].append(line.split(": ")[1].strip())
+                elif "Prompt:" in line:
+                    metrics["Prompt"].append(line.split(": ")[1].strip())
         return metrics
 
-    metrics_pytorch = parse_results(results_pytorch["Result"])
-    metrics_crypten = parse_results(results_crypten["Result"])
+    metrics_pytorch = parse_results('results_gpu_pytorch.txt')
+    metrics_crypten = parse_results('results_gpu_crypten.txt')
 
     # Create bar plot
     def create_bar_plot():
@@ -62,9 +66,12 @@ def display_results():
         </body>
     </html>
     '''
+    pytorch_results_str = "\n".join([f"{key}: {value}" for key, values in metrics_pytorch.items() for value in values])
+    crypten_results_str = "\n".join([f"{key}: {value}" for key, values in metrics_crypten.items() for value in values])
+
     return render_template_string(html_content,
-                                  pytorch_results=results_pytorch.to_string(index=False),
-                                  crypten_results=results_crypten.to_string(index=False))
+                                  pytorch_results=pytorch_results_str,
+                                  crypten_results=crypten_results_str)
 
 if __name__ == '__main__':
     if not os.path.exists('static'):
