@@ -1,6 +1,5 @@
 import subprocess
 
-
 def run_script(script_name):
     result = subprocess.run(['python3', script_name], capture_output=True, text=True)
     if result.returncode != 0:
@@ -8,12 +7,11 @@ def run_script(script_name):
     else:
         print(f"Output of {script_name}:\n{result.stdout}")
 
-
-# Run interactive_inference_pytorch.py
+# Run inference_gpu_pytorch.py
 print("Running inference_gpu_pytorch.py")
 run_script('inference_gpu_pytorch.py')
 
-# Run interactive_inference_crypten.py
+# Run inference_gpu_crypten.py
 print("Running inference_gpu_crypten.py")
 run_script('inference_gpu_crypten.py')
 
