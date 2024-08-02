@@ -21,7 +21,7 @@ def display_results():
             "Generated text": [],
             "Prompt": []
         }
-        for i in range(0, len(results), 7):
+        for i in range(0, len(results), 8):
             metrics["Inference time"].append(float(results[i].split(": ")[1]))
             metrics["Precision"].append(float(results[i + 1].split(": ")[1]))
             metrics["Recall"].append(float(results[i + 2].split(": ")[1]))
