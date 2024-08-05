@@ -8,7 +8,6 @@ input_file = "inference_results.txt"
 # Create a Flask application
 app = Flask(__name__)
 
-
 @app.route('/')
 def index():
     # Initialize variables to store metrics
@@ -100,22 +99,39 @@ def index():
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <title>Inference Results</title>
+            <style>
+                .container {
+                    display: flex;
+                    justify-content: space-around;
+                    align-items: flex-start;
+                }
+                .plot {
+                    width: 30%; /* Adjust width as needed */
+                }
+            </style>
         </head>
         <body>
             <h1>Inference Results</h1>
-            <h2>Inference Time</h2>
-            {{ plot_html_inference_time|safe }}
-            <h2>Number of Generated Tokens</h2>
-            {{ plot_html_num_generated_tokens|safe }}
-            <h2>Memory Usage</h2>
-            {{ plot_html_memory_used|safe }}
+            <div class="container">
+                <div class="plot">
+                    <h2>Inference Time</h2>
+                    {{ plot_html_inference_time|safe }}
+                </div>
+                <div class="plot">
+                    <h2>Number of Generated Tokens</h2>
+                    {{ plot_html_num_generated_tokens|safe }}
+                </div>
+                <div class="plot">
+                    <h2>Memory Usage</h2>
+                    {{ plot_html_memory_used|safe }}
+                </div>
+            </div>
         </body>
         </html>
     ''',
-                                  plot_html_inference_time=plot_html_inference_time,
-                                  plot_html_num_generated_tokens=plot_html_num_generated_tokens,
-                                  plot_html_memory_used=plot_html_memory_used)
-
+    plot_html_inference_time=plot_html_inference_time,
+    plot_html_num_generated_tokens=plot_html_num_generated_tokens,
+    plot_html_memory_used=plot_html_memory_used)
 
 if __name__ == '__main__':
     # Run the Flask app
