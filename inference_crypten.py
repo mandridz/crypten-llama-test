@@ -40,8 +40,10 @@ start_time = time.time()
 
 # Generate text (decrypting the messages for the model)
 # Note: Make sure the model can handle encrypted inputs
+encrypted_input_ids_list = encrypted_input_ids.get_plain_text().tolist()[0]
+decrypted_input_ids = [int(x) for x in encrypted_input_ids_list]
 outputs = pipeline(
-    tokenizer.decode(encrypted_input_ids.get_plain_text().tolist()[0]),  # Decrypting and decoding
+    tokenizer.decode(decrypted_input_ids),  # Decrypting and decoding
     max_new_tokens=256,
     num_return_sequences=1,
     do_sample=True,
