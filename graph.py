@@ -9,6 +9,7 @@ input_file2 = "inference_crypten_result.txt"
 # Create a Flask application
 app = Flask(__name__)
 
+
 @app.route('/')
 def index():
     # Read data from both files
@@ -114,20 +115,25 @@ def index():
         </body>
         </html>
     ''',
-    plot_html_inference_time=plot_html_inference_time,
-    plot_html_num_generated_tokens=plot_html_num_generated_tokens,
-    plot_html_memory_used=plot_html_memory_used)
+                                  plot_html_inference_time=plot_html_inference_time,
+                                  plot_html_num_generated_tokens=plot_html_num_generated_tokens,
+                                  plot_html_memory_used=plot_html_memory_used)
+
 
 def read_data_from_file(file_name):
     # Use pandas to read the data from the file
     df = pd.read_csv(file_name, sep='\t')
+
+    # Ensure the data is correctly read
     print(df.head())  # Print the first few rows of the DataFrame
     print(df.columns)  # Print the column names
+
     return {
         'Inference Time': df['Inference Time'].values[0],
         'Number of Generated Tokens': df['Number of Generated Tokens'].values[0],
         'Memory Used': df['Memory Used'].values[0]
     }
+
 
 if __name__ == '__main__':
     # Run the Flask app
