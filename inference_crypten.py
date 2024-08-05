@@ -18,6 +18,10 @@ pipeline = transformers.pipeline(
     device_map="auto",
 )
 
+# Set the pad token to be the same as the eos token if it is not set
+if pipeline.tokenizer.pad_token is None:
+    pipeline.tokenizer.pad_token = pipeline.tokenizer.eos_token
+
 # Input messages
 messages = [
     {"role": "system", "content": "You are a helpful and honest programming assistant."},
