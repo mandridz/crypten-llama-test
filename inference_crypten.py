@@ -39,9 +39,10 @@ encrypted_input_ids = crypten.cryptensor(input_ids['input_ids'])
 start_time = time.time()
 
 # Generate text (decrypting the messages for the model)
-# Note: Make sure the model can handle encrypted inputs
 encrypted_input_ids_list = encrypted_input_ids.get_plain_text().tolist()[0]
 decrypted_input_ids = [int(x) for x in encrypted_input_ids_list]
+
+# Generate output using the model
 outputs = pipeline(
     tokenizer.decode(decrypted_input_ids),  # Decrypting and decoding
     max_new_tokens=256,
@@ -86,3 +87,4 @@ print(f"Results saved to {output_file}")
 print(f"Inference Time: {inference_time:.2f} seconds")
 print(f"Number of Generated Tokens: {num_generated_tokens}")
 print(f"Memory Used: {memory_used:.2f} MB")
+print(f"Generated Text: {generated_text}")  # Print the generated text in console
