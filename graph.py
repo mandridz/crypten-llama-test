@@ -9,17 +9,11 @@ input_file2 = "inference_crypten_result.txt"
 # Create a Flask application
 app = Flask(__name__)
 
-
 @app.route('/')
 def index():
     # Read data from both files
     data1 = read_data_from_file(input_file1)
     data2 = read_data_from_file(input_file2)
-
-    # Combine data from both files
-    inference_time = data1['Inference Time'] + data2['Inference Time']
-    num_generated_tokens = data1['Number of Generated Tokens'] + data2['Number of Generated Tokens']
-    memory_used = data1['Memory Used'] + data2['Memory Used']
 
     # Create figures
     fig_inference_time = go.Figure()
@@ -28,9 +22,9 @@ def index():
 
     # Add trace for inference time
     fig_inference_time.add_trace(go.Bar(
-        x=['Inference Time'],
-        y=[inference_time],
-        marker_color=['indianred', 'indianred']
+        x=['Inference Results', 'Crypten Results'],
+        y=[data1['Inference Time'], data2['Inference Time']],
+        marker_color=['indianred', 'lightcoral']
     ))
     fig_inference_time.update_layout(
         title='Inference Time',
@@ -45,9 +39,9 @@ def index():
 
     # Add trace for number of generated tokens
     fig_num_generated_tokens.add_trace(go.Bar(
-        x=['Number of Generated Tokens'],
-        y=[num_generated_tokens],
-        marker_color=['lightsalmon', 'lightsalmon']
+        x=['Inference Results', 'Crypten Results'],
+        y=[data1['Number of Generated Tokens'], data2['Number of Generated Tokens']],
+        marker_color=['lightsalmon', 'lightpink']
     ))
     fig_num_generated_tokens.update_layout(
         title='Number of Generated Tokens',
@@ -62,9 +56,9 @@ def index():
 
     # Add trace for memory usage
     fig_memory_used.add_trace(go.Bar(
-        x=['Memory Used'],
-        y=[memory_used],
-        marker_color=['gold', 'gold']
+        x=['Inference Results', 'Crypten Results'],
+        y=[data1['Memory Used'], data2['Memory Used']],
+        marker_color=['gold', 'lightyellow']
     ))
     fig_memory_used.update_layout(
         title='Memory Usage',
@@ -120,24 +114,18 @@ def index():
         </body>
         </html>
     ''',
-                                  plot_html_inference_time=plot_html_inference_time,
-                                  plot_html_num_generated_tokens=plot_html_num_generated_tokens,
-                                  plot_html_memory_used=plot_html_memory_used)
-
+    plot_html_inference_time=plot_html_inference_time,
+    plot_html_num_generated_tokens=plot_html_num_generated_tokens,
+    plot_html_memory_used=plot_html_memory_used)
 
 def read_data_from_file(file_name):
-    data = {}
-    with open(file_name, 'r') as file:
-        lines = file.readlines()
-        for line in lines:
-            if "Inference Time:" in line:
-                data['Inference Time'] = float(line.split(":")[1].strip().split()[0])
-            elif "Number of Generated Tokens:" in line:
-                data['Number of Generated Tokens'] = int(line.split(":")[1].strip())
-            elif "Memory Used:" in line:
-                data['Memory Used'] = float(line.split(":")[1].strip().split()[0])
-    return data
-
+    # Use pandas to read the data from the file
+    df = pd.read_csv(file_name, sep='\t')
+    return {
+        'Inference Time': df['Inference Time'].values[0],
+        'Number of Generated Tokens': df['Number of Generated Tokens'].values[0],
+        'Memory Used': df['Memory Used'].values[0]
+    }
 
 if __name__ == '__main__':
     # Run the Flask app
