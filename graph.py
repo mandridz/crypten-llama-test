@@ -124,7 +124,7 @@ def read_data_from_file(file_name):
     # Use pandas to read the data from the file
     df = pd.read_csv(file_name, sep='\t')
 
-    # Ensure the data is correctly read
+    # Print the first few rows of the DataFrame and the column names for debugging
     print(df.head())  # Print the first few rows of the DataFrame
     print(df.columns)  # Print the column names
 
