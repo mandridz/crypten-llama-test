@@ -44,11 +44,12 @@ inference_time = end_time - start_time
 generated_text = outputs[0]["generated_text"]
 
 # Ensure generated_text is a string
-if isinstance(generated_text, str):
-    # Count the number of generated tokens using the tokenizer
-    num_generated_tokens = len(pipeline.tokenizer(generated_text)["input_ids"])
-else:
-    num_generated_tokens = 0  # Handle unexpected output
+if isinstance(generated_text, list):
+    # Join the list of dictionaries into a single string
+    generated_text = ' '.join([item['content'] for item in generated_text])
+
+# Count the number of generated tokens using the tokenizer
+num_generated_tokens = len(pipeline.tokenizer(generated_text)["input_ids"])
 
 # Get memory usage
 memory_info = psutil.virtual_memory()
