@@ -8,11 +8,27 @@ input_file = "inference_results.txt"
 # Create a Flask application
 app = Flask(__name__)
 
-
 @app.route('/')
 def index():
+    # Initialize variables to store metrics
+    inference_time = None
+    num_generated_tokens = None
+    memory_used = None
+
     # Read data from the file
-    data = pd.read_csv(input_file, sep='\t')
+    with open(input_file, 'r') as file:
+        lines = file.readlines()
+        for line in lines:
+            if "Inference Time:" in line:
+                inference_time = float(line.split(":")[1].strip().split()[0])
+            elif "Number of Generated Tokens:" in line:
+                num_generated_tokens = int(line.split(":")[1].strip())
+            elif "Memory Used:" in line:
+                memory_used = float(line.split(":")[1].strip().split()[0])
+
+    # Check if all metrics were found
+    if inference_time is None or num_generated_tokens is None or memory_used is None:
+        return "Error: Expected metrics are missing in the data.", 500
 
     # Create figures
     fig = go.Figure()
@@ -20,7 +36,7 @@ def index():
     # Add trace for inference time
     fig.add_trace(go.Bar(
         x=['Inference Time'],
-        y=[data['Inference Time'].values[0]],
+        y=[inference_time],
         marker_color='indianred'
     ))
 
@@ -39,7 +55,7 @@ def index():
     # Add trace for number of generated tokens
     fig.add_trace(go.Bar(
         x=['Number of Generated Tokens'],
-        y=[data['Number of Generated Tokens'].values[0]],
+        y=[num_generated_tokens],
         marker_color='lightsalmon'
     ))
 
@@ -58,7 +74,7 @@ def index():
     # Add trace for memory usage
     fig.add_trace(go.Bar(
         x=['Memory Used'],
-        y=[data['Memory Used'].values[0]],
+        y=[memory_used],
         marker_color='gold'
     ))
 
@@ -92,7 +108,6 @@ def index():
         </body>
         </html>
     ''', plot_html=plot_html)
-
 
 if __name__ == '__main__':
     # Run the Flask app
