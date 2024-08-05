@@ -24,15 +24,20 @@ messages = [
     {"role": "user", "content": "What is Llama 3.1?"}
 ]
 
-# Encrypt the input messages
-encrypted_messages = [crypten.cryptensor(torch.tensor([msg['content']])) for msg in messages]
+# Tokenize the input messages
+tokenizer = pipeline.tokenizer
+input_ids = tokenizer([msg['content'] for msg in messages], return_tensors='pt', padding=True, truncation=True)
+
+# Encrypt the input IDs
+encrypted_input_ids = crypten.cryptensor(input_ids['input_ids'])
 
 # Measure the start time of inference
 start_time = time.time()
 
 # Generate text (decrypting the messages for the model)
+# Note: Make sure the model can handle encrypted inputs
 outputs = pipeline(
-    [{'role': 'system', 'content': msg.get_plain_text()} for msg in encrypted_messages],
+    tokenizer.decode(encrypted_input_ids.get_plain_text().tolist()[0]),  # Decrypting and decoding
     max_new_tokens=256,
     num_return_sequences=1,
     do_sample=True,
@@ -56,7 +61,7 @@ if isinstance(generated_text, list):
     generated_text = ' '.join([item['content'] for item in generated_text])
 
 # Count the number of generated tokens using the tokenizer
-num_generated_tokens = len(pipeline.tokenizer(generated_text)["input_ids"])
+num_generated_tokens = len(tokenizer(generated_text)["input_ids"])
 
 # Get memory usage
 memory_info = psutil.virtual_memory()
