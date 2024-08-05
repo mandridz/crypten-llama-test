@@ -56,26 +56,11 @@ memory_info = psutil.virtual_memory()
 memory_used = memory_info.used / (1024 ** 2)  # Convert to megabytes
 
 # Define the output file name
-output_file = "inference_results.txt"
+output_file = "inference.py"
 
 # Print and write results to file
 with open(output_file, "w") as file:
-    print("Generated Text:")
-    file.write("Generated Text:\n")
+    file.write("Inference Time\tNumber of Generated Tokens\tMemory Used\n")
+    file.write(f"{inference_time:.2f}\t{num_generated_tokens}\t{memory_used:.2f}\n")
 
-    print(generated_text)
-    file.write(generated_text + "\n\n")
-
-    print("\nInference Metrics:")
-    file.write("\nInference Metrics:\n")
-
-    print(f"Inference Time: {inference_time:.2f} seconds")
-    file.write(f"Inference Time: {inference_time:.2f} seconds\n")
-
-    print(f"Number of Generated Tokens: {num_generated_tokens}")
-    file.write(f"Number of Generated Tokens: {num_generated_tokens}\n")
-
-    print(f"Memory Used: {memory_used:.2f} MB")
-    file.write(f"Memory Used: {memory_used:.2f} MB\n")
-
-print("\nResults saved to", output_file)
+print(f"Results saved to {output_file}")
