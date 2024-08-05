@@ -2,33 +2,24 @@ import pandas as pd
 import plotly.graph_objects as go
 from flask import Flask, render_template_string
 
-# Input file name with results
-input_file = "inference_results.txt"
+# Input file names with results
+input_file1 = "inference_results.txt"
+input_file2 = "inference_crypten_result.txt"
 
 # Create a Flask application
 app = Flask(__name__)
 
+
 @app.route('/')
 def index():
-    # Initialize variables to store metrics
-    inference_time = None
-    num_generated_tokens = None
-    memory_used = None
+    # Read data from both files
+    data1 = read_data_from_file(input_file1)
+    data2 = read_data_from_file(input_file2)
 
-    # Read data from the file
-    with open(input_file, 'r') as file:
-        lines = file.readlines()
-        for line in lines:
-            if "Inference Time:" in line:
-                inference_time = float(line.split(":")[1].strip().split()[0])
-            elif "Number of Generated Tokens:" in line:
-                num_generated_tokens = int(line.split(":")[1].strip())
-            elif "Memory Used:" in line:
-                memory_used = float(line.split(":")[1].strip().split()[0])
-
-    # Check if all metrics were found
-    if inference_time is None or num_generated_tokens is None or memory_used is None:
-        return "Error: Expected metrics are missing in the data.", 500
+    # Combine data from both files
+    inference_time = data1['Inference Time'] + data2['Inference Time']
+    num_generated_tokens = data1['Number of Generated Tokens'] + data2['Number of Generated Tokens']
+    memory_used = data1['Memory Used'] + data2['Memory Used']
 
     # Create figures
     fig_inference_time = go.Figure()
@@ -39,7 +30,7 @@ def index():
     fig_inference_time.add_trace(go.Bar(
         x=['Inference Time'],
         y=[inference_time],
-        marker_color='indianred'
+        marker_color=['indianred', 'indianred']
     ))
     fig_inference_time.update_layout(
         title='Inference Time',
@@ -56,7 +47,7 @@ def index():
     fig_num_generated_tokens.add_trace(go.Bar(
         x=['Number of Generated Tokens'],
         y=[num_generated_tokens],
-        marker_color='lightsalmon'
+        marker_color=['lightsalmon', 'lightsalmon']
     ))
     fig_num_generated_tokens.update_layout(
         title='Number of Generated Tokens',
@@ -73,7 +64,7 @@ def index():
     fig_memory_used.add_trace(go.Bar(
         x=['Memory Used'],
         y=[memory_used],
-        marker_color='gold'
+        marker_color=['gold', 'gold']
     ))
     fig_memory_used.update_layout(
         title='Memory Usage',
@@ -129,9 +120,24 @@ def index():
         </body>
         </html>
     ''',
-    plot_html_inference_time=plot_html_inference_time,
-    plot_html_num_generated_tokens=plot_html_num_generated_tokens,
-    plot_html_memory_used=plot_html_memory_used)
+                                  plot_html_inference_time=plot_html_inference_time,
+                                  plot_html_num_generated_tokens=plot_html_num_generated_tokens,
+                                  plot_html_memory_used=plot_html_memory_used)
+
+
+def read_data_from_file(file_name):
+    data = {}
+    with open(file_name, 'r') as file:
+        lines = file.readlines()
+        for line in lines:
+            if "Inference Time:" in line:
+                data['Inference Time'] = float(line.split(":")[1].strip().split()[0])
+            elif "Number of Generated Tokens:" in line:
+                data['Number of Generated Tokens'] = int(line.split(":")[1].strip())
+            elif "Memory Used:" in line:
+                data['Memory Used'] = float(line.split(":")[1].strip().split()[0])
+    return data
+
 
 if __name__ == '__main__':
     # Run the Flask app
