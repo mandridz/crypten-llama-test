@@ -74,7 +74,7 @@ memory_info = psutil.virtual_memory()
 memory_used = memory_info.used / (1024 ** 2)  # Convert to megabytes
 
 # Define the output file name
-output_file = "inference_crypten.txt"
+output_file = "inference_crypten_result.txt"
 
 # Print and write results to file
 with open(output_file, "w") as file:
