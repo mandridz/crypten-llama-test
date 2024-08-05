@@ -23,9 +23,9 @@ def index():
 
     # Add trace for inference time
     fig_inference_time.add_trace(go.Bar(
-        x=['Inference Results', 'Crypten Results'],
+        x=['Simple Inference', 'Crypten Inference'],
         y=[data1['Inference Time'], data2['Inference Time']],
-        marker_color=['indianred', 'lightcoral']
+        marker_color=['green', 'blue']
     ))
     fig_inference_time.update_layout(
         title='Inference Time',
@@ -40,9 +40,9 @@ def index():
 
     # Add trace for number of generated tokens
     fig_num_generated_tokens.add_trace(go.Bar(
-        x=['Inference Results', 'Crypten Results'],
+        x=['Simple Inference', 'Crypten Inference'],
         y=[data1['Number of Generated Tokens'], data2['Number of Generated Tokens']],
-        marker_color=['lightsalmon', 'lightpink']
+        marker_color=['green', 'blue']
     ))
     fig_num_generated_tokens.update_layout(
         title='Number of Generated Tokens',
@@ -57,9 +57,9 @@ def index():
 
     # Add trace for memory usage
     fig_memory_used.add_trace(go.Bar(
-        x=['Inference Results', 'Crypten Results'],
+        x=['Simple Inference', 'Crypten Inference'],
         y=[data1['Memory Used'], data2['Memory Used']],
-        marker_color=['gold', 'lightyellow']
+        marker_color=['green', 'blue']
     ))
     fig_memory_used.update_layout(
         title='Memory Usage',
