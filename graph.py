@@ -8,6 +8,7 @@ input_file = "inference_results.txt"
 # Create a Flask application
 app = Flask(__name__)
 
+
 @app.route('/')
 def index():
     # Initialize variables to store metrics
@@ -31,17 +32,17 @@ def index():
         return "Error: Expected metrics are missing in the data.", 500
 
     # Create figures
-    fig = go.Figure()
+    fig_inference_time = go.Figure()
+    fig_num_generated_tokens = go.Figure()
+    fig_memory_used = go.Figure()
 
     # Add trace for inference time
-    fig.add_trace(go.Bar(
+    fig_inference_time.add_trace(go.Bar(
         x=['Inference Time'],
         y=[inference_time],
         marker_color='indianred'
     ))
-
-    # Update layout for inference time
-    fig.update_layout(
+    fig_inference_time.update_layout(
         title='Inference Time',
         xaxis_tickfont_size=14,
         yaxis=dict(
@@ -53,14 +54,12 @@ def index():
     )
 
     # Add trace for number of generated tokens
-    fig.add_trace(go.Bar(
+    fig_num_generated_tokens.add_trace(go.Bar(
         x=['Number of Generated Tokens'],
         y=[num_generated_tokens],
         marker_color='lightsalmon'
     ))
-
-    # Update layout for number of generated tokens
-    fig.update_layout(
+    fig_num_generated_tokens.update_layout(
         title='Number of Generated Tokens',
         xaxis_tickfont_size=14,
         yaxis=dict(
@@ -72,14 +71,12 @@ def index():
     )
 
     # Add trace for memory usage
-    fig.add_trace(go.Bar(
+    fig_memory_used.add_trace(go.Bar(
         x=['Memory Used'],
         y=[memory_used],
         marker_color='gold'
     ))
-
-    # Update layout for memory usage
-    fig.update_layout(
+    fig_memory_used.update_layout(
         title='Memory Usage',
         xaxis_tickfont_size=14,
         yaxis=dict(
@@ -90,10 +87,12 @@ def index():
         bargap=0.1
     )
 
-    # Generate HTML for the plot
-    plot_html = fig.to_html(full_html=False)
+    # Generate HTML for the plots
+    plot_html_inference_time = fig_inference_time.to_html(full_html=False)
+    plot_html_num_generated_tokens = fig_num_generated_tokens.to_html(full_html=False)
+    plot_html_memory_used = fig_memory_used.to_html(full_html=False)
 
-    # Render the plot in a simple HTML template
+    # Render the plots in a simple HTML template
     return render_template_string('''
         <!DOCTYPE html>
         <html lang="en">
@@ -104,10 +103,19 @@ def index():
         </head>
         <body>
             <h1>Inference Results</h1>
-            {{ plot_html|safe }}
+            <h2>Inference Time</h2>
+            {{ plot_html_inference_time|safe }}
+            <h2>Number of Generated Tokens</h2>
+            {{ plot_html_num_generated_tokens|safe }}
+            <h2>Memory Usage</h2>
+            {{ plot_html_memory_used|safe }}
         </body>
         </html>
-    ''', plot_html=plot_html)
+    ''',
+                                  plot_html_inference_time=plot_html_inference_time,
+                                  plot_html_num_generated_tokens=plot_html_num_generated_tokens,
+                                  plot_html_memory_used=plot_html_memory_used)
+
 
 if __name__ == '__main__':
     # Run the Flask app
