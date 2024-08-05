@@ -9,7 +9,6 @@ input_file2 = "inference_crypten_result.txt"
 # Create a Flask application
 app = Flask(__name__)
 
-
 @app.route('/')
 def index():
     # Read data from both files
@@ -115,25 +114,34 @@ def index():
         </body>
         </html>
     ''',
-                                  plot_html_inference_time=plot_html_inference_time,
-                                  plot_html_num_generated_tokens=plot_html_num_generated_tokens,
-                                  plot_html_memory_used=plot_html_memory_used)
-
+    plot_html_inference_time=plot_html_inference_time,
+    plot_html_num_generated_tokens=plot_html_num_generated_tokens,
+    plot_html_memory_used=plot_html_memory_used)
 
 def read_data_from_file(file_name):
-    # Use pandas to read the data from the file
-    df = pd.read_csv(file_name, sep='\t')
-
-    # Print the first few rows of the DataFrame and the column names for debugging
-    print(df.head())  # Print the first few rows of the DataFrame
-    print(df.columns)  # Print the column names
-
-    return {
-        'Inference Time': df['Inference Time'].values[0],
-        'Number of Generated Tokens': df['Number of Generated Tokens'].values[0],
-        'Memory Used': df['Memory Used'].values[0]
+    # Initialize a dictionary to store metrics
+    metrics = {
+        'Inference Time': None,
+        'Number of Generated Tokens': None,
+        'Memory Used': None
     }
 
+    # Read the file line by line
+    with open(file_name, 'r') as file:
+        lines = file.readlines()
+        for line in lines:
+            if "Inference Time:" in line:
+                metrics['Inference Time'] = float(line.split(":")[1].strip().split()[0])
+            elif "Number of Generated Tokens:" in line:
+                metrics['Number of Generated Tokens'] = int(line.split(":")[1].strip())
+            elif "Memory Used:" in line:
+                metrics['Memory Used'] = float(line.split(":")[1].strip().split()[0])
+
+    # Check if all metrics were found
+    if None in metrics.values():
+        raise ValueError("Error: Expected metrics are missing in the data.")
+
+    return metrics
 
 if __name__ == '__main__':
     # Run the Flask app
