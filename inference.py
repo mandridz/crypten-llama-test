@@ -43,8 +43,12 @@ inference_time = end_time - start_time
 # Get the generated text
 generated_text = outputs[0]["generated_text"]
 
-# Count the number of generated tokens
-num_generated_tokens = len(pipeline.tokenizer.encode(generated_text))
+# Ensure generated_text is a string
+if isinstance(generated_text, str):
+    # Count the number of generated tokens using the tokenizer
+    num_generated_tokens = len(pipeline.tokenizer(generated_text)["input_ids"])
+else:
+    num_generated_tokens = 0  # Handle unexpected output
 
 # Get memory usage
 memory_info = psutil.virtual_memory()
